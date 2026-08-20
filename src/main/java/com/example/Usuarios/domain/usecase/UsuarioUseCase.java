@@ -37,6 +37,15 @@ public class UsuarioUseCase implements IUsuarioServicePort {
         usuarioPersistencePort.guardarPropietario(propietario);
     }
 
+    @Override
+    public Usuario obtenerUsuarioPorId(Long id) {
+        return usuarioPersistencePort.obtenerUsuarioPorId(id)
+                .orElseThrow(() ->
+                        new RuntimeException(
+                                "No existe un usuario con el id: " + id
+                        )
+                );
+    }
 
 
 }

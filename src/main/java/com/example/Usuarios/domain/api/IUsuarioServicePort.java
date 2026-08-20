@@ -4,4 +4,5 @@ import com.example.Usuarios.domain.model.Usuario;
 
 public interface IUsuarioServicePort {
     void crearPropietario(Usuario propietario);
+    Usuario obtenerUsuarioPorId(Long id);
 }
