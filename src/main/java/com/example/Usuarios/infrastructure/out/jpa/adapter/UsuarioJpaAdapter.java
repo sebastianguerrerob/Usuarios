@@ -7,6 +7,8 @@ import com.example.Usuarios.infrastructure.out.jpa.mapper.IUsuarioEntityMapper;
 import com.example.Usuarios.infrastructure.out.jpa.repository.IUsuarioRepository;
 import lombok.RequiredArgsConstructor;
 
+import java.util.Optional;
+
 @RequiredArgsConstructor
 public class UsuarioJpaAdapter implements IUsuarioPersistencePort {
 
@@ -17,5 +19,11 @@ public class UsuarioJpaAdapter implements IUsuarioPersistencePort {
     public void guardarPropietario(Usuario usuario) {
         UsuarioEntity entity = usuarioEntityMapper.toEntity(usuario);
         usuarioRepository.save(entity);
+    }
+
+    @Override
+    public Optional<Usuario> obtenerUsuarioPorId(Long id) {
+        return usuarioRepository.findById(id)
+                .map(usuarioEntityMapper::toUsuario);
     }
 }
