@@ -26,4 +26,10 @@ public class UsuarioJpaAdapter implements IUsuarioPersistencePort {
         return usuarioRepository.findById(id)
                 .map(usuarioEntityMapper::toUsuario);
     }
+
+    @Override
+    public Optional<Usuario> obtenerUsuarioPorCorreo(String correo) {
+        return usuarioRepository.findByCorreo(correo)
+                .map(usuarioEntityMapper::toUsuario);
+    }
 }
