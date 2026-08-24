@@ -23,6 +23,12 @@ public class UsuarioRestController {
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
+    @PostMapping("/empleado")
+    public ResponseEntity<Void> crearEmpleado(@RequestBody UsuarioRequestDto usuarioRequestDto) {
+        usuarioServicePort.crearEmpleado(usuarioRequestMapper.toUsuario(usuarioRequestDto));
+        return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<Usuario> obtenerUsuarioPorId(
             @PathVariable Long id
