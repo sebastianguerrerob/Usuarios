@@ -6,6 +6,7 @@ import java.util.Optional;
 
 public interface IUsuarioPersistencePort {
     void guardarPropietario(Usuario Propietario);
+    void guardarEmpleado(Usuario empleado);
     Optional<Usuario> obtenerUsuarioPorId(Long id);
     Optional<Usuario> obtenerUsuarioPorCorreo(String correo);
 }
