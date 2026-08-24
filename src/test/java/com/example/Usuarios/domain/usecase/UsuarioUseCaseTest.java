@@ -377,5 +377,89 @@ class  UsuarioUseCaseTest {
         }
     }
 
+    @Nested
+    @DisplayName("HU-8: crear la cuenta de un cliente")
+    class CrearCliente {
+
+        private Usuario clienteValido() {
+            return Usuario.builder()
+                    .nombre("Ana")
+                    .apellido("Rodriguez")
+                    .numeroDocumento("6666666666")
+                    .celular("+573006666666")
+                    .correo("ana.rodriguez@example.com")
+                    .clave(CLAVE_PLANA)
+                    .build();
+        }
+
+        @Test
+        @DisplayName("crea cliente con datos validos y asigna rol 4")
+        void creaClienteConDatosValidos() {
+            when(passwordHandler.encode(CLAVE_PLANA)).thenReturn(CLAVE_ENCRIPTADA);
+            Usuario entrada = clienteValido();
+
+            usuarioUseCase.crearCliente(entrada);
+
+            verify(usuarioPersistencePort).guardarCliente(usuarioCaptor.capture());
+            Usuario guardado = usuarioCaptor.getValue();
+            assertThat(guardado.getRolId()).isEqualTo(4L);
+            assertThat(guardado.getClave()).isEqualTo(CLAVE_ENCRIPTADA);
+            assertThat(guardado.getNombre()).isEqualTo("Ana");
+            assertThat(guardado.getCorreo()).isEqualTo("ana.rodriguez@example.com");
+        }
+
+        @Test
+        @DisplayName("rechaza cliente con documento no numerico")
+        void rechazaDocumentoNoNumerico() {
+            Usuario entrada = clienteValido();
+            entrada.setNumeroDocumento("ABC123");
+
+            assertThatThrownBy(() -> usuarioUseCase.crearCliente(entrada))
+                    .isInstanceOf(RuntimeException.class)
+                    .hasMessageContaining("documento");
+
+            verifyNoInteractions(usuarioPersistencePort);
+        }
+
+        @Test
+        @DisplayName("rechaza cliente con celular invalido")
+        void rechazaCelularInvalido() {
+            Usuario entrada = clienteValido();
+            entrada.setCelular("invalido123");
+
+            assertThatThrownBy(() -> usuarioUseCase.crearCliente(entrada))
+                    .isInstanceOf(RuntimeException.class)
+                    .hasMessageContaining("celular");
+
+            verifyNoInteractions(usuarioPersistencePort);
+        }
+
+        @Test
+        @DisplayName("rechaza cliente con correo invalido")
+        void rechazaCorreoInvalido() {
+            Usuario entrada = clienteValido();
+            entrada.setCorreo("sin-arroba.com");
+
+            assertThatThrownBy(() -> usuarioUseCase.crearCliente(entrada))
+                    .isInstanceOf(RuntimeException.class)
+                    .hasMessageContaining("correo");
+
+            verifyNoInteractions(usuarioPersistencePort);
+        }
+
+        @Test
+        @DisplayName("siempre asigna rol cliente (4) sin importar el rolId recibido")
+        void siempreAsignaRolCliente() {
+            when(passwordHandler.encode(CLAVE_PLANA)).thenReturn(CLAVE_ENCRIPTADA);
+            Usuario entrada = clienteValido();
+            entrada.setRolId(1L);
+
+            usuarioUseCase.crearCliente(entrada);
+
+            verify(usuarioPersistencePort).guardarCliente(usuarioCaptor.capture());
+            assertThat(usuarioCaptor.getValue().getRolId()).isEqualTo(4L);
+        }
+    }
+
 
 }

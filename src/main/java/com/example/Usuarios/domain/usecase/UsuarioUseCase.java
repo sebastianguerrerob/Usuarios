@@ -63,5 +63,21 @@ public class UsuarioUseCase implements IUsuarioServicePort {
         usuarioPersistencePort.guardarEmpleado(empleado);
     }
 
+    @Override
+    public void crearCliente(Usuario cliente) {
+        if (!cliente.getNumeroDocumento().matches(REGEX_DOCUMENTO)) {
+            throw new RuntimeException("El documento debe ser únicamente numérico");
+        }
+        if (!cliente.getCelular().matches(REGEX_CELULAR)) {
+            throw new RuntimeException("Formato de celular inválido (máx 13 caracteres)");
+        }
+        if (!cliente.getCorreo().matches(REGEX_CORREO)) {
+            throw new RuntimeException("El correo no tiene un formato válido");
+        }
+        cliente.setClave(passwordHandler.encode(cliente.getClave()));
+        cliente.setRolId(4L);
+        usuarioPersistencePort.guardarCliente(cliente);
+    }
+
 
 }
