@@ -293,5 +293,89 @@ class  UsuarioUseCaseTest {
         }
     }
 
+    @Nested
+    @DisplayName("HU-6: crear la cuenta de un empleado")
+    class CrearEmpleado {
+
+        private Usuario empleadoValido() {
+            return Usuario.builder()
+                    .nombre("Pedro")
+                    .apellido("Garcia")
+                    .numeroDocumento("9876543210")
+                    .celular("+573005551234")
+                    .correo("pedro.garcia@example.com")
+                    .clave(CLAVE_PLANA)
+                    .build();
+        }
+
+        @Test
+        @DisplayName("crea empleado con datos validos y asigna rol 3")
+        void creaEmpleadoConDatosValidos() {
+            when(passwordHandler.encode(CLAVE_PLANA)).thenReturn(CLAVE_ENCRIPTADA);
+            Usuario entrada = empleadoValido();
+
+            usuarioUseCase.crearEmpleado(entrada);
+
+            verify(usuarioPersistencePort).guardarEmpleado(usuarioCaptor.capture());
+            Usuario guardado = usuarioCaptor.getValue();
+            assertThat(guardado.getRolId()).isEqualTo(3L);
+            assertThat(guardado.getClave()).isEqualTo(CLAVE_ENCRIPTADA);
+            assertThat(guardado.getNombre()).isEqualTo("Pedro");
+            assertThat(guardado.getCorreo()).isEqualTo("pedro.garcia@example.com");
+        }
+
+        @Test
+        @DisplayName("rechaza empleado con documento no numerico")
+        void rechazaDocumentoNoNumerico() {
+            Usuario entrada = empleadoValido();
+            entrada.setNumeroDocumento("123ABC");
+
+            assertThatThrownBy(() -> usuarioUseCase.crearEmpleado(entrada))
+                    .isInstanceOf(RuntimeException.class)
+                    .hasMessageContaining("documento");
+
+            verifyNoInteractions(usuarioPersistencePort);
+        }
+
+        @Test
+        @DisplayName("rechaza empleado con celular invalido")
+        void rechazaCelularInvalido() {
+            Usuario entrada = empleadoValido();
+            entrada.setCelular("300-invalid");
+
+            assertThatThrownBy(() -> usuarioUseCase.crearEmpleado(entrada))
+                    .isInstanceOf(RuntimeException.class)
+                    .hasMessageContaining("celular");
+
+            verifyNoInteractions(usuarioPersistencePort);
+        }
+
+        @Test
+        @DisplayName("rechaza empleado con correo invalido")
+        void rechazaCorreoInvalido() {
+            Usuario entrada = empleadoValido();
+            entrada.setCorreo("correo-sin-arroba");
+
+            assertThatThrownBy(() -> usuarioUseCase.crearEmpleado(entrada))
+                    .isInstanceOf(RuntimeException.class)
+                    .hasMessageContaining("correo");
+
+            verifyNoInteractions(usuarioPersistencePort);
+        }
+
+        @Test
+        @DisplayName("siempre asigna rol empleado (3) sin importar el rolId recibido")
+        void siempreAsignaRolEmpleado() {
+            when(passwordHandler.encode(CLAVE_PLANA)).thenReturn(CLAVE_ENCRIPTADA);
+            Usuario entrada = empleadoValido();
+            entrada.setRolId(99L);
+
+            usuarioUseCase.crearEmpleado(entrada);
+
+            verify(usuarioPersistencePort).guardarEmpleado(usuarioCaptor.capture());
+            assertThat(usuarioCaptor.getValue().getRolId()).isEqualTo(3L);
+        }
+    }
+
 
 }
