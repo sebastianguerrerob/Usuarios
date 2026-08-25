@@ -4,6 +4,7 @@ import com.example.Usuarios.application.dto.UsuarioRequestDto;
 import com.example.Usuarios.application.mapper.IUsuarioRequestMapper;
 import com.example.Usuarios.domain.api.IUsuarioServicePort;
 import com.example.Usuarios.domain.model.Usuario;
+import com.example.Usuarios.infrastructure.configuration.security.JwtService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +17,7 @@ public class UsuarioRestController {
 
     private final IUsuarioServicePort usuarioServicePort;
     private final IUsuarioRequestMapper usuarioRequestMapper;
+    private final JwtService jwtService;
 
     @PostMapping("/propietario")
     public ResponseEntity<Void> crearPropietario(@RequestBody UsuarioRequestDto usuarioRequestDto) {
@@ -24,8 +26,11 @@ public class UsuarioRestController {
     }
 
     @PostMapping("/empleado")
-    public ResponseEntity<Void> crearEmpleado(@RequestBody UsuarioRequestDto usuarioRequestDto) {
-        usuarioServicePort.crearEmpleado(usuarioRequestMapper.toUsuario(usuarioRequestDto));
+    public ResponseEntity<Void> crearEmpleado(@RequestHeader("Authorization") String authHeader,
+                                              @RequestBody UsuarioRequestDto usuarioRequestDto) {
+        String token = authHeader.substring(7);
+        Long propietarioId = jwtService.extractUserId(token);
+        usuarioServicePort.crearEmpleado(usuarioRequestMapper.toUsuario(usuarioRequestDto), propietarioId);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
