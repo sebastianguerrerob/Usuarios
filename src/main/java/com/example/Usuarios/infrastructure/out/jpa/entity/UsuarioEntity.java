@@ -27,4 +27,7 @@ public class UsuarioEntity {
     @ManyToOne
     @JoinColumn(name = "id_rol")
     private RolEntity rol;
+
+    @Column(name = "id_restaurante")
+    private Long restauranteId;
 }
