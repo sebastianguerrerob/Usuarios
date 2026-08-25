@@ -49,6 +49,9 @@ public class UsuarioUseCase implements IUsuarioServicePort {
 
     @Override
     public void crearEmpleado(Usuario empleado) {
+        if (empleado.getRestauranteId() == null) {
+            throw new RuntimeException("El empleado debe estar asociado a un restaurante");
+        }
         if (!empleado.getNumeroDocumento().matches(REGEX_DOCUMENTO)) {
             throw new RuntimeException("El documento debe ser únicamente numérico");
         }
