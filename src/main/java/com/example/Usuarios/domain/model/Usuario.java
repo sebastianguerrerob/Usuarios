@@ -21,4 +21,5 @@ public class Usuario {
     private String correo;
     private String clave;
     private Long rolId;
+    private Long restauranteId;
 }

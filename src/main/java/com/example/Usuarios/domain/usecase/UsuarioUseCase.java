@@ -4,6 +4,7 @@ import com.example.Usuarios.application.handler.IPasswordHandler;
 import com.example.Usuarios.domain.api.IUsuarioServicePort;
 import com.example.Usuarios.domain.model.Usuario;
 import com.example.Usuarios.domain.spi.IUsuarioPersistencePort;
+import com.example.Usuarios.domain.spi.IRestauranteValidationPort;
 import lombok.RequiredArgsConstructor;
 
 import java.time.LocalDate;
@@ -14,6 +15,7 @@ public class UsuarioUseCase implements IUsuarioServicePort {
 
     private final IUsuarioPersistencePort usuarioPersistencePort;
     private final IPasswordHandler passwordHandler;
+    private final IRestauranteValidationPort restauranteValidationPort;
     private static final String REGEX_DOCUMENTO = "\\d+";
     private static final String REGEX_CELULAR = "^\\+?\\d{1,12}$";
     private static final String REGEX_CORREO = "^[A-Za-z0-9+_.-]+@(.+)$";
@@ -48,7 +50,13 @@ public class UsuarioUseCase implements IUsuarioServicePort {
     }
 
     @Override
-    public void crearEmpleado(Usuario empleado) {
+    public void crearEmpleado(Usuario empleado, Long propietarioId) {
+        if (empleado.getRestauranteId() == null) {
+            throw new RuntimeException("El empleado debe estar asociado a un restaurante");
+        }
+        if (!restauranteValidationPort.validarPropietarioRestaurante(empleado.getRestauranteId(), propietarioId)) {
+            throw new RuntimeException("El restaurante no pertenece al propietario autenticado");
+        }
         if (!empleado.getNumeroDocumento().matches(REGEX_DOCUMENTO)) {
             throw new RuntimeException("El documento debe ser únicamente numérico");
         }
