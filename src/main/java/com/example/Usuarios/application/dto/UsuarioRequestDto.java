@@ -16,4 +16,5 @@ public class UsuarioRequestDto {
     private LocalDate fechaNacimiento;
     private String correo;
     private String clave;
+    private Long restauranteId;
 }
