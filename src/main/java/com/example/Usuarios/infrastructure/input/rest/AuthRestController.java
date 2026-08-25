@@ -6,6 +6,7 @@ import com.example.Usuarios.application.handler.IPasswordHandler;
 import com.example.Usuarios.domain.exception.DomainException;
 import com.example.Usuarios.domain.model.Usuario;
 import com.example.Usuarios.domain.spi.IUsuarioPersistencePort;
+import com.example.Usuarios.domain.util.DomainConstants;
 import com.example.Usuarios.infrastructure.configuration.security.JwtService;
 import com.example.Usuarios.infrastructure.out.jpa.entity.RolEntity;
 import com.example.Usuarios.infrastructure.out.jpa.repository.IUsuarioRepository;
@@ -29,10 +30,10 @@ public class AuthRestController {
     @PostMapping("/login")
     public ResponseEntity<AuthResponseDto> login(@RequestBody AuthRequestDto authRequestDto) {
         Usuario usuario = usuarioPersistencePort.obtenerUsuarioPorCorreo(authRequestDto.getCorreo())
-                .orElseThrow(() -> new DomainException("Credenciales inválidas"));
+                .orElseThrow(() -> new DomainException(DomainConstants.CREDENCIALES_INVALIDAS));
 
         if (!passwordHandler.matches(authRequestDto.getClave(), usuario.getClave())) {
-            throw new DomainException("Credenciales inválidas");
+            throw new DomainException(DomainConstants.CREDENCIALES_INVALIDAS);
         }
 
         String rolNombre = usuarioRepository.findByCorreo(authRequestDto.getCorreo())
