@@ -4,6 +4,7 @@ import com.example.Usuarios.application.handler.IPasswordHandler;
 import com.example.Usuarios.domain.api.IUsuarioServicePort;
 import com.example.Usuarios.domain.exception.DomainException;
 import com.example.Usuarios.domain.model.Usuario;
+import com.example.Usuarios.domain.model.RolEnum;
 import com.example.Usuarios.domain.spi.IUsuarioPersistencePort;
 import com.example.Usuarios.domain.spi.IRestauranteValidationPort;
 import lombok.RequiredArgsConstructor;
@@ -36,7 +37,7 @@ public class UsuarioUseCase implements IUsuarioServicePort {
             throw new DomainException("El correo no tiene un formato válido");
         }
         propietario.setClave(passwordHandler.encode(propietario.getClave()));
-        propietario.setRolId(2L);
+        propietario.setRolId(RolEnum.PROPIETARIO.getId());
         usuarioPersistencePort.guardarPropietario(propietario);
     }
 
@@ -68,7 +69,7 @@ public class UsuarioUseCase implements IUsuarioServicePort {
             throw new DomainException("El correo no tiene un formato válido");
         }
         empleado.setClave(passwordHandler.encode(empleado.getClave()));
-        empleado.setRolId(3L);
+        empleado.setRolId(RolEnum.EMPLEADO.getId());
         usuarioPersistencePort.guardarEmpleado(empleado);
     }
 
@@ -84,7 +85,7 @@ public class UsuarioUseCase implements IUsuarioServicePort {
             throw new DomainException("El correo no tiene un formato válido");
         }
         cliente.setClave(passwordHandler.encode(cliente.getClave()));
-        cliente.setRolId(4L);
+        cliente.setRolId(RolEnum.CLIENTE.getId());
         usuarioPersistencePort.guardarCliente(cliente);
     }
 
