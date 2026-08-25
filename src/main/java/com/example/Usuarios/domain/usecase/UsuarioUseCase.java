@@ -2,6 +2,7 @@ package com.example.Usuarios.domain.usecase;
 
 import com.example.Usuarios.application.handler.IPasswordHandler;
 import com.example.Usuarios.domain.api.IUsuarioServicePort;
+import com.example.Usuarios.domain.exception.DomainException;
 import com.example.Usuarios.domain.model.Usuario;
 import com.example.Usuarios.domain.spi.IUsuarioPersistencePort;
 import com.example.Usuarios.domain.spi.IRestauranteValidationPort;
@@ -23,16 +24,16 @@ public class UsuarioUseCase implements IUsuarioServicePort {
     @Override
     public void crearPropietario(Usuario propietario) {
         if (Period.between(propietario.getFechaNacimiento(), LocalDate.now()).getYears() < 18) {
-            throw new RuntimeException("El usuario debe ser mayor de edad");
+            throw new DomainException("El usuario debe ser mayor de edad");
         }
         if (!propietario.getNumeroDocumento().matches(REGEX_DOCUMENTO)) {
-            throw new RuntimeException("El documento debe ser únicamente numérico");
+            throw new DomainException("El documento debe ser únicamente numérico");
         }
         if (!propietario.getCelular().matches(REGEX_CELULAR)) {
-            throw new RuntimeException("Formato de celular inválido (máx 13 caracteres)");
+            throw new DomainException("Formato de celular inválido (máx 13 caracteres)");
         }
         if (!propietario.getCorreo().matches(REGEX_CORREO)) {
-            throw new RuntimeException("El correo no tiene un formato válido");
+            throw new DomainException("El correo no tiene un formato válido");
         }
         propietario.setClave(passwordHandler.encode(propietario.getClave()));
         propietario.setRolId(2L);
@@ -43,7 +44,7 @@ public class UsuarioUseCase implements IUsuarioServicePort {
     public Usuario obtenerUsuarioPorId(Long id) {
         return usuarioPersistencePort.obtenerUsuarioPorId(id)
                 .orElseThrow(() ->
-                        new RuntimeException(
+                        new DomainException(
                                 "No existe un usuario con el id: " + id
                         )
                 );
@@ -52,19 +53,19 @@ public class UsuarioUseCase implements IUsuarioServicePort {
     @Override
     public void crearEmpleado(Usuario empleado, Long propietarioId) {
         if (empleado.getRestauranteId() == null) {
-            throw new RuntimeException("El empleado debe estar asociado a un restaurante");
+            throw new DomainException("El empleado debe estar asociado a un restaurante");
         }
         if (!restauranteValidationPort.validarPropietarioRestaurante(empleado.getRestauranteId(), propietarioId)) {
-            throw new RuntimeException("El restaurante no pertenece al propietario autenticado");
+            throw new DomainException("El restaurante no pertenece al propietario autenticado");
         }
         if (!empleado.getNumeroDocumento().matches(REGEX_DOCUMENTO)) {
-            throw new RuntimeException("El documento debe ser únicamente numérico");
+            throw new DomainException("El documento debe ser únicamente numérico");
         }
         if (!empleado.getCelular().matches(REGEX_CELULAR)) {
-            throw new RuntimeException("Formato de celular inválido (máx 13 caracteres)");
+            throw new DomainException("Formato de celular inválido (máx 13 caracteres)");
         }
         if (!empleado.getCorreo().matches(REGEX_CORREO)) {
-            throw new RuntimeException("El correo no tiene un formato válido");
+            throw new DomainException("El correo no tiene un formato válido");
         }
         empleado.setClave(passwordHandler.encode(empleado.getClave()));
         empleado.setRolId(3L);
@@ -74,13 +75,13 @@ public class UsuarioUseCase implements IUsuarioServicePort {
     @Override
     public void crearCliente(Usuario cliente) {
         if (!cliente.getNumeroDocumento().matches(REGEX_DOCUMENTO)) {
-            throw new RuntimeException("El documento debe ser únicamente numérico");
+            throw new DomainException("El documento debe ser únicamente numérico");
         }
         if (!cliente.getCelular().matches(REGEX_CELULAR)) {
-            throw new RuntimeException("Formato de celular inválido (máx 13 caracteres)");
+            throw new DomainException("Formato de celular inválido (máx 13 caracteres)");
         }
         if (!cliente.getCorreo().matches(REGEX_CORREO)) {
-            throw new RuntimeException("El correo no tiene un formato válido");
+            throw new DomainException("El correo no tiene un formato válido");
         }
         cliente.setClave(passwordHandler.encode(cliente.getClave()));
         cliente.setRolId(4L);
