@@ -1,4 +1,4 @@
-package com.example.Usuarios.application.handler.implementation;
+package com.example.Usuarios.infrastructure.configuration.security;
 
 import com.example.Usuarios.application.handler.IPasswordHandler;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
