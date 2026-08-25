@@ -2,15 +2,8 @@ package com.example.Usuarios.infrastructure.input.rest;
 
 import com.example.Usuarios.application.dto.AuthRequestDto;
 import com.example.Usuarios.application.dto.AuthResponseDto;
-import com.example.Usuarios.application.handler.IPasswordHandler;
-import com.example.Usuarios.domain.exception.DomainException;
-import com.example.Usuarios.domain.model.Usuario;
-import com.example.Usuarios.domain.spi.IUsuarioPersistencePort;
-import com.example.Usuarios.domain.util.DomainConstants;
+import com.example.Usuarios.domain.api.IAuthServicePort;
 import com.example.Usuarios.infrastructure.configuration.security.JwtService;
-import com.example.Usuarios.infrastructure.out.jpa.entity.RolEntity;
-import com.example.Usuarios.infrastructure.out.jpa.repository.IUsuarioRepository;
-import com.example.Usuarios.infrastructure.out.jpa.mapper.IUsuarioEntityMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,25 +15,12 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class AuthRestController {
 
-    private final IUsuarioPersistencePort usuarioPersistencePort;
-    private final IPasswordHandler passwordHandler;
+    private final IAuthServicePort authServicePort;
     private final JwtService jwtService;
-    private final IUsuarioRepository usuarioRepository;
 
     @PostMapping("/login")
     public ResponseEntity<AuthResponseDto> login(@RequestBody AuthRequestDto authRequestDto) {
-        Usuario usuario = usuarioPersistencePort.obtenerUsuarioPorCorreo(authRequestDto.getCorreo())
-                .orElseThrow(() -> new DomainException(DomainConstants.CREDENCIALES_INVALIDAS));
-
-        if (!passwordHandler.matches(authRequestDto.getClave(), usuario.getClave())) {
-            throw new DomainException(DomainConstants.CREDENCIALES_INVALIDAS);
-        }
-
-        String rolNombre = usuarioRepository.findByCorreo(authRequestDto.getCorreo())
-                .map(entity -> entity.getRol().getNombre())
-                .orElse("UNKNOWN");
-
-        String token = jwtService.generateToken(usuario.getCorreo(), rolNombre, usuario.getId());
+        String token = authServicePort.login(authRequestDto.getCorreo(), authRequestDto.getClave());
         return ResponseEntity.ok(new AuthResponseDto(token));
     }
 

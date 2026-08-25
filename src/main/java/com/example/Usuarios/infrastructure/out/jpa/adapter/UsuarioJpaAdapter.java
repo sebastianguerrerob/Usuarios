@@ -44,4 +44,11 @@ public class UsuarioJpaAdapter implements IUsuarioPersistencePort {
         return usuarioRepository.findByCorreo(correo)
                 .map(usuarioEntityMapper::toUsuario);
     }
+
+    @Override
+    public String obtenerNombreRolPorUsuarioId(Long id) {
+        return usuarioRepository.findById(id)
+                .map(entity -> entity.getRol().getNombre())
+                .orElse("UNKNOWN");
+    }
 }

@@ -1,9 +1,10 @@
 package com.example.Usuarios.infrastructure.configuration.security;
 
-import com.example.Usuarios.application.handler.IPasswordHandler;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import com.example.Usuarios.domain.spi.IPasswordHandler;
 
 @Service
 public class BCryptPasswordHandler implements IPasswordHandler {

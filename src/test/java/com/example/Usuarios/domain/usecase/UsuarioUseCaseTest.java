@@ -1,8 +1,8 @@
 package com.example.Usuarios.domain.usecase;
 
-import com.example.Usuarios.application.handler.IPasswordHandler;
 import com.example.Usuarios.domain.exception.DomainException;
 import com.example.Usuarios.domain.model.Usuario;
+import com.example.Usuarios.domain.spi.IPasswordHandler;
 import com.example.Usuarios.domain.spi.IRestauranteValidationPort;
 import com.example.Usuarios.domain.spi.IUsuarioPersistencePort;
 import org.junit.jupiter.api.DisplayName;

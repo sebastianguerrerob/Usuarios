@@ -10,4 +10,5 @@ public interface IUsuarioPersistencePort {
     void guardarCliente(Usuario cliente);
     Optional<Usuario> obtenerUsuarioPorId(Long id);
     Optional<Usuario> obtenerUsuarioPorCorreo(String correo);
+    String obtenerNombreRolPorUsuarioId(Long id);
 }
