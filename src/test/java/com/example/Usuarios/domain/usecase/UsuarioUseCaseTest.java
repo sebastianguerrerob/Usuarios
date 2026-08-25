@@ -2,6 +2,7 @@ package com.example.Usuarios.domain.usecase;
 
 import com.example.Usuarios.application.handler.IPasswordHandler;
 import com.example.Usuarios.domain.model.Usuario;
+import com.example.Usuarios.domain.spi.IRestauranteValidationPort;
 import com.example.Usuarios.domain.spi.IUsuarioPersistencePort;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -20,6 +21,7 @@ import java.time.LocalDate;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -37,6 +39,9 @@ class  UsuarioUseCaseTest {
 
     @Mock
     private IPasswordHandler passwordHandler;
+
+    @Mock
+    private IRestauranteValidationPort restauranteValidationPort;
 
     @InjectMocks
     private UsuarioUseCase usuarioUseCase;
@@ -297,6 +302,9 @@ class  UsuarioUseCaseTest {
     @DisplayName("HU-6: crear la cuenta de un empleado")
     class CrearEmpleado {
 
+        private static final Long PROPIETARIO_ID = 10L;
+        private static final Long RESTAURANTE_ID = 1L;
+
         private Usuario empleadoValido() {
             return Usuario.builder()
                     .nombre("Pedro")
@@ -305,6 +313,7 @@ class  UsuarioUseCaseTest {
                     .celular("+573005551234")
                     .correo("pedro.garcia@example.com")
                     .clave(CLAVE_PLANA)
+                    .restauranteId(RESTAURANTE_ID)
                     .build();
         }
 
@@ -312,9 +321,10 @@ class  UsuarioUseCaseTest {
         @DisplayName("crea empleado con datos validos y asigna rol 3")
         void creaEmpleadoConDatosValidos() {
             when(passwordHandler.encode(CLAVE_PLANA)).thenReturn(CLAVE_ENCRIPTADA);
+            when(restauranteValidationPort.validarPropietarioRestaurante(RESTAURANTE_ID, PROPIETARIO_ID)).thenReturn(true);
             Usuario entrada = empleadoValido();
 
-            usuarioUseCase.crearEmpleado(entrada);
+            usuarioUseCase.crearEmpleado(entrada, PROPIETARIO_ID);
 
             verify(usuarioPersistencePort).guardarEmpleado(usuarioCaptor.capture());
             Usuario guardado = usuarioCaptor.getValue();
@@ -322,15 +332,43 @@ class  UsuarioUseCaseTest {
             assertThat(guardado.getClave()).isEqualTo(CLAVE_ENCRIPTADA);
             assertThat(guardado.getNombre()).isEqualTo("Pedro");
             assertThat(guardado.getCorreo()).isEqualTo("pedro.garcia@example.com");
+            assertThat(guardado.getRestauranteId()).isEqualTo(RESTAURANTE_ID);
+        }
+
+        @Test
+        @DisplayName("rechaza empleado sin restauranteId")
+        void rechazaSinRestauranteId() {
+            Usuario entrada = empleadoValido();
+            entrada.setRestauranteId(null);
+
+            assertThatThrownBy(() -> usuarioUseCase.crearEmpleado(entrada, PROPIETARIO_ID))
+                    .isInstanceOf(RuntimeException.class)
+                    .hasMessageContaining("restaurante");
+
+            verifyNoInteractions(usuarioPersistencePort);
+        }
+
+        @Test
+        @DisplayName("rechaza si el restaurante no pertenece al propietario")
+        void rechazaRestauranteNoPertenece() {
+            when(restauranteValidationPort.validarPropietarioRestaurante(RESTAURANTE_ID, PROPIETARIO_ID)).thenReturn(false);
+            Usuario entrada = empleadoValido();
+
+            assertThatThrownBy(() -> usuarioUseCase.crearEmpleado(entrada, PROPIETARIO_ID))
+                    .isInstanceOf(RuntimeException.class)
+                    .hasMessageContaining("no pertenece");
+
+            verifyNoInteractions(usuarioPersistencePort);
         }
 
         @Test
         @DisplayName("rechaza empleado con documento no numerico")
         void rechazaDocumentoNoNumerico() {
+            when(restauranteValidationPort.validarPropietarioRestaurante(RESTAURANTE_ID, PROPIETARIO_ID)).thenReturn(true);
             Usuario entrada = empleadoValido();
             entrada.setNumeroDocumento("123ABC");
 
-            assertThatThrownBy(() -> usuarioUseCase.crearEmpleado(entrada))
+            assertThatThrownBy(() -> usuarioUseCase.crearEmpleado(entrada, PROPIETARIO_ID))
                     .isInstanceOf(RuntimeException.class)
                     .hasMessageContaining("documento");
 
@@ -340,10 +378,11 @@ class  UsuarioUseCaseTest {
         @Test
         @DisplayName("rechaza empleado con celular invalido")
         void rechazaCelularInvalido() {
+            when(restauranteValidationPort.validarPropietarioRestaurante(RESTAURANTE_ID, PROPIETARIO_ID)).thenReturn(true);
             Usuario entrada = empleadoValido();
             entrada.setCelular("300-invalid");
 
-            assertThatThrownBy(() -> usuarioUseCase.crearEmpleado(entrada))
+            assertThatThrownBy(() -> usuarioUseCase.crearEmpleado(entrada, PROPIETARIO_ID))
                     .isInstanceOf(RuntimeException.class)
                     .hasMessageContaining("celular");
 
@@ -353,10 +392,11 @@ class  UsuarioUseCaseTest {
         @Test
         @DisplayName("rechaza empleado con correo invalido")
         void rechazaCorreoInvalido() {
+            when(restauranteValidationPort.validarPropietarioRestaurante(RESTAURANTE_ID, PROPIETARIO_ID)).thenReturn(true);
             Usuario entrada = empleadoValido();
             entrada.setCorreo("correo-sin-arroba");
 
-            assertThatThrownBy(() -> usuarioUseCase.crearEmpleado(entrada))
+            assertThatThrownBy(() -> usuarioUseCase.crearEmpleado(entrada, PROPIETARIO_ID))
                     .isInstanceOf(RuntimeException.class)
                     .hasMessageContaining("correo");
 
@@ -367,10 +407,11 @@ class  UsuarioUseCaseTest {
         @DisplayName("siempre asigna rol empleado (3) sin importar el rolId recibido")
         void siempreAsignaRolEmpleado() {
             when(passwordHandler.encode(CLAVE_PLANA)).thenReturn(CLAVE_ENCRIPTADA);
+            when(restauranteValidationPort.validarPropietarioRestaurante(RESTAURANTE_ID, PROPIETARIO_ID)).thenReturn(true);
             Usuario entrada = empleadoValido();
             entrada.setRolId(99L);
 
-            usuarioUseCase.crearEmpleado(entrada);
+            usuarioUseCase.crearEmpleado(entrada, PROPIETARIO_ID);
 
             verify(usuarioPersistencePort).guardarEmpleado(usuarioCaptor.capture());
             assertThat(usuarioCaptor.getValue().getRolId()).isEqualTo(3L);
