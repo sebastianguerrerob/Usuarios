@@ -1,6 +1,8 @@
 package com.example.Usuarios.infrastructure.input.rest;
 
-import com.example.Usuarios.application.dto.UsuarioRequestDto;
+import com.example.Usuarios.application.dto.ClienteRequestDto;
+import com.example.Usuarios.application.dto.EmpleadoRequestDto;
+import com.example.Usuarios.application.dto.PropietarioRequestDto;
 import com.example.Usuarios.application.mapper.IUsuarioRequestMapper;
 import com.example.Usuarios.domain.api.IUsuarioServicePort;
 import com.example.Usuarios.domain.model.Usuario;
@@ -20,23 +22,23 @@ public class UsuarioRestController {
     private final JwtService jwtService;
 
     @PostMapping("/propietario")
-    public ResponseEntity<Void> crearPropietario(@RequestBody UsuarioRequestDto usuarioRequestDto) {
-        usuarioServicePort.crearPropietario(usuarioRequestMapper.toUsuario(usuarioRequestDto));
+    public ResponseEntity<Void> crearPropietario(@RequestBody PropietarioRequestDto propietarioRequestDto) {
+        usuarioServicePort.crearPropietario(usuarioRequestMapper.toUsuarioFromPropietario(propietarioRequestDto));
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     @PostMapping("/empleado")
     public ResponseEntity<Void> crearEmpleado(@RequestHeader("Authorization") String authHeader,
-                                              @RequestBody UsuarioRequestDto usuarioRequestDto) {
+                                              @RequestBody EmpleadoRequestDto empleadoRequestDto) {
         String token = authHeader.substring(7);
         Long propietarioId = jwtService.extractUserId(token);
-        usuarioServicePort.crearEmpleado(usuarioRequestMapper.toUsuario(usuarioRequestDto), propietarioId);
+        usuarioServicePort.crearEmpleado(usuarioRequestMapper.toUsuarioFromEmpleado(empleadoRequestDto), propietarioId);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     @PostMapping("/cliente")
-    public ResponseEntity<Void> crearCliente(@RequestBody UsuarioRequestDto usuarioRequestDto) {
-        usuarioServicePort.crearCliente(usuarioRequestMapper.toUsuario(usuarioRequestDto));
+    public ResponseEntity<Void> crearCliente(@RequestBody ClienteRequestDto clienteRequestDto) {
+        usuarioServicePort.crearCliente(usuarioRequestMapper.toUsuarioFromCliente(clienteRequestDto));
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
