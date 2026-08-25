@@ -1,4 +1,4 @@
-package com.example.Usuarios.application.handler;
+package com.example.Usuarios.domain.spi;
 
 public interface IPasswordHandler {
     String encode(String password);

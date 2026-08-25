@@ -1,9 +1,12 @@
 package com.example.Usuarios.infrastructure.configuration;
 
-import com.example.Usuarios.application.handler.IPasswordHandler;
+import com.example.Usuarios.domain.api.IAuthServicePort;
 import com.example.Usuarios.domain.api.IUsuarioServicePort;
+import com.example.Usuarios.domain.spi.IPasswordHandler;
 import com.example.Usuarios.domain.spi.IRestauranteValidationPort;
+import com.example.Usuarios.domain.spi.ITokenGeneratorPort;
 import com.example.Usuarios.domain.spi.IUsuarioPersistencePort;
+import com.example.Usuarios.domain.usecase.AuthUseCase;
 import com.example.Usuarios.domain.usecase.UsuarioUseCase;
 import com.example.Usuarios.infrastructure.out.jpa.adapter.UsuarioJpaAdapter;
 import com.example.Usuarios.infrastructure.out.jpa.mapper.IUsuarioEntityMapper;
@@ -20,6 +23,7 @@ public class BeanConfiguration {
     private final IUsuarioEntityMapper usuarioEntityMapper;
     private final IPasswordHandler passwordHandler;
     private final IRestauranteValidationPort restauranteValidationPort;
+    private final ITokenGeneratorPort tokenGeneratorPort;
 
     @Bean
     public IUsuarioPersistencePort usuarioPersistencePort() {
@@ -29,5 +33,10 @@ public class BeanConfiguration {
     @Bean
     public IUsuarioServicePort usuarioServicePort() {
         return new UsuarioUseCase(usuarioPersistencePort(), passwordHandler, restauranteValidationPort);
+    }
+
+    @Bean
+    public IAuthServicePort authServicePort() {
+        return new AuthUseCase(usuarioPersistencePort(), passwordHandler, tokenGeneratorPort);
     }
 }

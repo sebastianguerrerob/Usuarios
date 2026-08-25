@@ -1,7 +1,8 @@
 package com.example.Usuarios.domain.usecase;
 
-import com.example.Usuarios.application.handler.IPasswordHandler;
+import com.example.Usuarios.domain.exception.DomainException;
 import com.example.Usuarios.domain.model.Usuario;
+import com.example.Usuarios.domain.spi.IPasswordHandler;
 import com.example.Usuarios.domain.spi.IRestauranteValidationPort;
 import com.example.Usuarios.domain.spi.IUsuarioPersistencePort;
 import org.junit.jupiter.api.DisplayName;
@@ -101,7 +102,7 @@ class  UsuarioUseCaseTest {
             entrada.setNumeroDocumento(documento);
 
             assertThatThrownBy(() -> usuarioUseCase.crearPropietario(entrada))
-                    .isInstanceOf(RuntimeException.class)
+                    .isInstanceOf(DomainException.class)
                     .hasMessageContaining("documento");
 
             verifyNoInteractions(usuarioPersistencePort);
@@ -159,7 +160,7 @@ class  UsuarioUseCaseTest {
             entrada.setCelular(celular);
 
             assertThatThrownBy(() -> usuarioUseCase.crearPropietario(entrada))
-                    .isInstanceOf(RuntimeException.class)
+                    .isInstanceOf(DomainException.class)
                     .hasMessageContaining("celular");
 
             verifyNoInteractions(usuarioPersistencePort);
@@ -176,7 +177,7 @@ class  UsuarioUseCaseTest {
 
             assertThat("3005698325123").hasSize(13);
             assertThatThrownBy(() -> usuarioUseCase.crearPropietario(entrada))
-                    .isInstanceOf(RuntimeException.class)
+                    .isInstanceOf(DomainException.class)
                     .hasMessageContaining("celular");
         }
     }
@@ -217,7 +218,7 @@ class  UsuarioUseCaseTest {
             entrada.setCorreo(correo);
 
             assertThatThrownBy(() -> usuarioUseCase.crearPropietario(entrada))
-                    .isInstanceOf(RuntimeException.class)
+                    .isInstanceOf(DomainException.class)
                     .hasMessageContaining("correo");
 
             verifyNoInteractions(usuarioPersistencePort);
@@ -278,7 +279,7 @@ class  UsuarioUseCaseTest {
             entrada.setFechaNacimiento(LocalDate.now().minusYears(18).plusDays(1));
 
             assertThatThrownBy(() -> usuarioUseCase.crearPropietario(entrada))
-                    .isInstanceOf(RuntimeException.class)
+                    .isInstanceOf(DomainException.class)
                     .hasMessage("El usuario debe ser mayor de edad");
 
             verifyNoInteractions(usuarioPersistencePort);
@@ -291,7 +292,7 @@ class  UsuarioUseCaseTest {
             entrada.setFechaNacimiento(LocalDate.now().minusYears(10));
 
             assertThatThrownBy(() -> usuarioUseCase.crearPropietario(entrada))
-                    .isInstanceOf(RuntimeException.class)
+                    .isInstanceOf(DomainException.class)
                     .hasMessage("El usuario debe ser mayor de edad");
 
             verifyNoInteractions(usuarioPersistencePort);
@@ -342,7 +343,7 @@ class  UsuarioUseCaseTest {
             entrada.setRestauranteId(null);
 
             assertThatThrownBy(() -> usuarioUseCase.crearEmpleado(entrada, PROPIETARIO_ID))
-                    .isInstanceOf(RuntimeException.class)
+                    .isInstanceOf(DomainException.class)
                     .hasMessageContaining("restaurante");
 
             verifyNoInteractions(usuarioPersistencePort);
@@ -355,7 +356,7 @@ class  UsuarioUseCaseTest {
             Usuario entrada = empleadoValido();
 
             assertThatThrownBy(() -> usuarioUseCase.crearEmpleado(entrada, PROPIETARIO_ID))
-                    .isInstanceOf(RuntimeException.class)
+                    .isInstanceOf(DomainException.class)
                     .hasMessageContaining("no pertenece");
 
             verifyNoInteractions(usuarioPersistencePort);
@@ -369,7 +370,7 @@ class  UsuarioUseCaseTest {
             entrada.setNumeroDocumento("123ABC");
 
             assertThatThrownBy(() -> usuarioUseCase.crearEmpleado(entrada, PROPIETARIO_ID))
-                    .isInstanceOf(RuntimeException.class)
+                    .isInstanceOf(DomainException.class)
                     .hasMessageContaining("documento");
 
             verifyNoInteractions(usuarioPersistencePort);
@@ -383,7 +384,7 @@ class  UsuarioUseCaseTest {
             entrada.setCelular("300-invalid");
 
             assertThatThrownBy(() -> usuarioUseCase.crearEmpleado(entrada, PROPIETARIO_ID))
-                    .isInstanceOf(RuntimeException.class)
+                    .isInstanceOf(DomainException.class)
                     .hasMessageContaining("celular");
 
             verifyNoInteractions(usuarioPersistencePort);
@@ -397,7 +398,7 @@ class  UsuarioUseCaseTest {
             entrada.setCorreo("correo-sin-arroba");
 
             assertThatThrownBy(() -> usuarioUseCase.crearEmpleado(entrada, PROPIETARIO_ID))
-                    .isInstanceOf(RuntimeException.class)
+                    .isInstanceOf(DomainException.class)
                     .hasMessageContaining("correo");
 
             verifyNoInteractions(usuarioPersistencePort);
@@ -456,7 +457,7 @@ class  UsuarioUseCaseTest {
             entrada.setNumeroDocumento("ABC123");
 
             assertThatThrownBy(() -> usuarioUseCase.crearCliente(entrada))
-                    .isInstanceOf(RuntimeException.class)
+                    .isInstanceOf(DomainException.class)
                     .hasMessageContaining("documento");
 
             verifyNoInteractions(usuarioPersistencePort);
@@ -469,7 +470,7 @@ class  UsuarioUseCaseTest {
             entrada.setCelular("invalido123");
 
             assertThatThrownBy(() -> usuarioUseCase.crearCliente(entrada))
-                    .isInstanceOf(RuntimeException.class)
+                    .isInstanceOf(DomainException.class)
                     .hasMessageContaining("celular");
 
             verifyNoInteractions(usuarioPersistencePort);
@@ -482,7 +483,7 @@ class  UsuarioUseCaseTest {
             entrada.setCorreo("sin-arroba.com");
 
             assertThatThrownBy(() -> usuarioUseCase.crearCliente(entrada))
-                    .isInstanceOf(RuntimeException.class)
+                    .isInstanceOf(DomainException.class)
                     .hasMessageContaining("correo");
 
             verifyNoInteractions(usuarioPersistencePort);
